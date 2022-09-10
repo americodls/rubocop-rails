@@ -70,9 +70,12 @@ module RuboCop
         end
 
         def pair(node)
-          children = node.children
-          attr_name = children.first.method_name
-          attr_value = children.last.source
+          left, _, right = node.children
+          if right.receiver&.lvar_type?
+            left, right = right, left
+          end
+          attr_name = left.method_name
+          attr_value = right.source
           attrs = [[attr_name, attr_value]]
         end
       end
