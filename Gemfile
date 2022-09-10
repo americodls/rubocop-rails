@@ -9,6 +9,7 @@ gemspec
 gem 'bump', require: false
 gem 'rake'
 gem 'rspec'
+gem 'debug'
 gem 'rubocop', github: 'rubocop/rubocop'
 gem 'rubocop-performance', '~> 1.14.0'
 gem 'rubocop-rspec', '~> 2.11.0'
