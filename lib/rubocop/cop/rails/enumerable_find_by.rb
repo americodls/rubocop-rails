@@ -45,7 +45,7 @@ module RuboCop
 
         def pair(node)
           attr_name = node.children.first.method_name
-          attr_value = node.children.last.method_name
+          attr_value = node.children.last.source
           attrs = [[attr_name, attr_value]]
         end
       end
