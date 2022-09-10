@@ -27,37 +27,26 @@ module RuboCop
           receiver = node.receiver.source
           block_node = node.block_node
           block_context = block_node.children.last
-          if block_context.and_type?
-            attrs = dig_and_nodes(block_context)
-            params = attrs.map { |k, v| "#{k}: #{v}" }.join(", ")
-            corrector.replace(block_node, "#{receiver}.find_by(#{params})")
-          else
-            # require 'debug'; debugger;
-            first_node_within_block = block_context.children.first
-            attr_name = first_node_within_block.method_name
-            attr_value = block_context.children.last.method_name
-            attrs = [[attr_name, attr_value]]
-            params = attrs.map { |k, v| "#{k}: #{v}" }.join(", ")
-            corrector.replace(block_node, "#{receiver}.find_by(#{params})")
-          end
+          attrs = pairs(block_context) 
+          params = attrs.map { |k, v| "#{k}: #{v}" }.join(", ")
+          
+          corrector.replace(block_node, "#{receiver}.find_by(#{params})")
         end
         
-        def dig_and_nodes(and_node)
-          left_node = and_node.children.first
-          right_node = and_node.children.last
-          left_pair =
-            if left_node.and_type?
-              dig_and_nodes(left_node)
-            else
-              children = left_node.children
-              [[children.first.method_name, children.last.method_name]]
-            end
-          right_pair = 
-            begin
-              children = right_node.children
-              [[children.first.method_name, children.last.method_name]]
-            end
+        def pairs(node)
+          return pair(node) unless node.and_type?
+
+          left_node = node.children.first
+          right_node = node.children.last
+          left_pair = left_node.and_type? ? pairs(left_node) : pair(left_node)
+          right_pair = pair(right_node)
           left_pair + right_pair
+        end
+
+        def pair(node)
+          attr_name = node.children.first.method_name
+          attr_value = node.children.last.method_name
+          attrs = [[attr_name, attr_value]]
         end
       end
     end
