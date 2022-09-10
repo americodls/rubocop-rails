@@ -11,6 +11,8 @@ module RuboCop
         RESTRICT_ON_SEND = %i[find].freeze
 
         def on_send(node)
+          return unless node.block_node
+
           range = offense_range(node)
           add_offense(range, message: MSG) do |corrector|
             autocorrect(corrector, node)
@@ -36,16 +38,18 @@ module RuboCop
         def pairs(node)
           return pair(node) unless node.and_type?
 
-          left_node = node.children.first
-          right_node = node.children.last
+          children = node.children
+          left_node = children.first
+          right_node = children.last
           left_pair = left_node.and_type? ? pairs(left_node) : pair(left_node)
           right_pair = pair(right_node)
           left_pair + right_pair
         end
 
         def pair(node)
-          attr_name = node.children.first.method_name
-          attr_value = node.children.last.source
+          children = node.children
+          attr_name = children.first.method_name
+          attr_value = children.last.source
           attrs = [[attr_name, attr_value]]
         end
       end

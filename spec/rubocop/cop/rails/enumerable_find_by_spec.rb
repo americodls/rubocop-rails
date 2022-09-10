@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe RuboCop::Cop::Rails::EnumerableFindBy, :config do
-  context 'when using an inline block that tests an attribute equality against a variable' do
+  context 'when given a block that tests an attribute equality against a variable' do
     it 'registers and corrects an offense' do
       expect_offense(<<~RUBY)
         people.find { |p| p.id == some_id }
@@ -14,7 +14,7 @@ RSpec.describe RuboCop::Cop::Rails::EnumerableFindBy, :config do
     end
   end
 
-  context 'when using an inline block that tests an attribute equality against a constant' do
+  context 'when given a block that tests an attribute equality against a constant' do
     it 'registers and corrects an offense' do
       expect_offense(<<~RUBY)
         people.find { |p| p.id == 42 }
@@ -27,7 +27,7 @@ RSpec.describe RuboCop::Cop::Rails::EnumerableFindBy, :config do
     end
   end
 
-  context 'when using an inline block that tests multiple attributes equality' do
+  context 'when given a block that tests multiple attributes equality' do
     it 'registers and corrects an offense' do
       expect_offense(<<~RUBY)
         people.find { |p| p.id == ID && p.code == some_code && p.type == "Typo" }
@@ -36,6 +36,14 @@ RSpec.describe RuboCop::Cop::Rails::EnumerableFindBy, :config do
 
       expect_correction(<<~RUBY)
         people.find_by(id: ID, code: some_code, type: "Typo")
+      RUBY
+    end
+  end
+
+  context 'when no block is given' do
+    it 'registers and corrects an offense' do
+      expect_no_offenses(<<~RUBY)
+        people.find(1)
       RUBY
     end
   end
