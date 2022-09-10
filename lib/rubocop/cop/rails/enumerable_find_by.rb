@@ -15,9 +15,9 @@ module RuboCop
         PATTERN
 
         def on_send(node)
-          return unless node.block_node
-
           block_node = node.block_node
+          return unless block_node
+
           return if method_called_on_attribute?(block_node)
 
           range = offense_range(node)
