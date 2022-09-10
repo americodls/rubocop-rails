@@ -56,6 +56,14 @@ RSpec.describe RuboCop::Cop::Rails::EnumerableFindBy, :config do
     end
   end
 
+  context 'when the attribute is passed as argument to any method' do
+    it 'does not register an offense' do
+      expect_no_offenses(<<~RUBY)
+        people.find { |p| convert(p) == CODE }
+      RUBY
+    end
+  end
+
   context 'when given a block that tests attributes inequality' do
     it 'does not register an offense' do
       expect_no_offenses(<<~RUBY)

@@ -18,7 +18,9 @@ module RuboCop
           (send (send (lvar _) _) $_ _)
         PATTERN
 
-
+        def_node_search :local_variable, <<~PATTERN
+          $(lvar _)
+        PATTERN
 
         def on_send(node)
           block_node = node.block_node
@@ -28,6 +30,10 @@ module RuboCop
 
           comparison_method(block_node) do |comparison|
             return if comparison != :==
+          end
+
+          local_variable(block_node) do |lvar|
+            return if lvar.parent.arguments.include?(lvar)
           end
 
           range = offense_range(node)
