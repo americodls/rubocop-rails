@@ -14,11 +14,21 @@ module RuboCop
           (send (send (lvar _) _) _)
         PATTERN
 
+        def_node_search :comparison_method, <<~PATTERN
+          (send (send (lvar _) _) $_ _)
+        PATTERN
+
+
+
         def on_send(node)
           block_node = node.block_node
           return unless block_node
 
           return if method_called_on_attribute?(block_node)
+
+          comparison_method(block_node) do |comparison|
+            return if comparison != :==
+          end
 
           range = offense_range(node)
           add_offense(range, message: MSG) do |corrector|

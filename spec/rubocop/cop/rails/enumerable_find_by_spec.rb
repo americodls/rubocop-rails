@@ -55,4 +55,12 @@ RSpec.describe RuboCop::Cop::Rails::EnumerableFindBy, :config do
       RUBY
     end
   end
+
+  context 'when given a block that tests attributes inequality' do
+    it 'does not register an offense' do
+      expect_no_offenses(<<~RUBY)
+        people.find { |p| p.id === ID }
+      RUBY
+    end
+  end
 end
