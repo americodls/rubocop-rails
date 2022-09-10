@@ -41,9 +41,17 @@ RSpec.describe RuboCop::Cop::Rails::EnumerableFindBy, :config do
   end
 
   context 'when no block is given' do
-    it 'registers and corrects an offense' do
+    it 'does not register an offense' do
       expect_no_offenses(<<~RUBY)
         people.find(1)
+      RUBY
+    end
+  end
+
+  context 'when any method is called on the attribute' do
+    it 'does not register an offense' do
+      expect_no_offenses(<<~RUBY)
+        people.find { |p| p.id.to_s == ID }
       RUBY
     end
   end

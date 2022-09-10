@@ -10,8 +10,15 @@ module RuboCop
         MSG = 'Use `find_by` instead of `find` when testing attributes equality.'
         RESTRICT_ON_SEND = %i[find].freeze
 
+        def_node_search :method_called_on_attribute?, <<~PATTERN
+          (send (send (lvar _) _) _)
+        PATTERN
+
         def on_send(node)
           return unless node.block_node
+
+          block_node = node.block_node
+          return if method_called_on_attribute?(block_node)
 
           range = offense_range(node)
           add_offense(range, message: MSG) do |corrector|
