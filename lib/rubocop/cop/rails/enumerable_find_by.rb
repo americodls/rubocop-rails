@@ -8,7 +8,7 @@ module RuboCop
         extend AutoCorrector
 
         MSG = 'Use `find_by` instead of `find` when testing attributes equality.'
-        RESTRICT_ON_SEND = %i[find].freeze
+        RESTRICT_ON_SEND = %i[find detect].freeze
 
         def_node_search :method_called_on_attribute?, <<~PATTERN
           (send (send (lvar _) _) _)
@@ -22,10 +22,21 @@ module RuboCop
           $(lvar _)
         PATTERN
 
+        def_node_matcher :find_block_with_attribute_equality?, <<~PATTERN
+          (block
+            (send _ {:find :detect})
+            (args (arg _))
+            {
+              (send (send (lvar _) _) :== _)
+              (send _ :== (send (lvar _) _))
+            })
+        PATTERN
+
         def on_send(node)
           block_node = node.block_node
-          return unless block_node
+          return unless find_block_with_attribute_equality?(node.block_node)
 
+          return if block_node.nil? || block_node.multiline?
           return if method_called_on_attribute?(block_node)
 
           comparison_method(block_node) do |comparison|
@@ -45,7 +56,7 @@ module RuboCop
         private
 
         def offense_range(node)
-          range_between(node.loc.selector.begin_pos, node.block_node.loc.last_column)
+          range_between(node.loc.selector.begin_pos, node.block_node.loc.expression.end_pos)
         end
 
         def autocorrect(corrector, node)
